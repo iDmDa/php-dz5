@@ -1,0 +1,48 @@
+version: '3'
+
+services:
+  # Контейнер с Nginx
+  nginx:
+    build:
+      context: ./nginx
+      dockerfile: Dockerfile
+    image: myapp/nginx
+    container_name: webserver
+    # Проброс портов
+    ports:
+      - "80:80"
+    volumes:
+      - ./code:/data/mysite.local
+    networks:
+      - app-network
+
+  # Контейнер с PHP-FPM
+  application:
+    build:
+      context: ./fpm
+      dockerfile: Dockerfile
+    image: myapp/php # имя будущего образа
+    container_name: application # имя контейнера после запуска
+    volumes:
+      - ./code:/data/mysite.local
+    networks:
+      - app-network
+
+  # Контейнер CLI
+  cli:
+    build:
+      context: ./cli
+      dockerfile: Dockerfile
+    image: myapp/php-cli
+    container_name: cli
+    volumes:
+      - ./code:/data/mysite.local
+    networks:
+      - app-network
+    stdin_open: true
+    tty: true
+
+# Docker Networks
+networks:
+  app-network:
+    driver: bridge
